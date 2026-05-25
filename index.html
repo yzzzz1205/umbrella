@@ -779,6 +779,19 @@
       box-shadow: 0 4px 10px rgba(92, 124, 137, 0.12);
       filter: brightness(0.95);
     }
+
+
+    .quiz-mini {
+      margin-top: 18px;
+      font-size: 15px;
+      color: #6b7a82;
+      opacity: 0.8;
+      cursor: pointer;
+    }
+
+    .quiz-mini:active {
+      transform: scale(0.98);
+    }
   </style>
 </head>
 
@@ -820,6 +833,9 @@
         <button onclick="goPage('form')">
           <i class="fa-solid fa-pen-nib"></i> 留下你的故事
         </button>
+      </div>
+      <div class="quiz-mini" onclick="goPage('quizPage')">
+        雨天人格測驗（點我玩）
       </div>
     </div>
 
@@ -944,6 +960,7 @@
 
       if (pageId === "home") loadJourney();
       if (pageId === "timeline") loadMessages();
+      if (pageId === "quizPage") loadQuiz();
     }
 
     function enterApp() {
