@@ -22,7 +22,26 @@
       font-family: 'MyHandFont';
       src: url('./AaJinRiHuaQing-ChunLanMaoKun.ttf') format('truetype');
     }
-
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+    #intro {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+}
+    body.intro-mode {
+  background: #0b1b2b;
+}
+    html.intro-mode,
+body.intro-mode {
+  background: #0b1b2b;
+  overflow: hidden;
+}
     /* 確保全域背景完全一致，消除手機邊緣與中間的色差 */
     body {
       margin: 0;
