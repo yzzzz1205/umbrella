@@ -7,7 +7,6 @@
 
   <title>漂流傘</title>
 
-  <!-- 引入思源黑體與 FontAwesome 圖標 -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -601,9 +600,13 @@
     }
 
     /* =========================
-🧠 心理測驗頁
-========================= */
+    🧠 心理測驗頁
+    ========================= */
     #quizPage {
+      position: relative;
+      /* 讓內部絕對定位的雲朵人能正確參照基準 */
+      overflow: hidden;
+      /* 防止雲朵人微微出界時產生瀏覽器捲軸 */
       justify-content: center;
       align-items: center;
       padding: 40px 20px;
@@ -615,6 +618,9 @@
       width: 100%;
       display: flex;
       justify-content: center;
+      position: relative;
+      z-index: 2;
+      /* 確保題目與卡片在雲朵人之上，絕對不擋到操作內容 */
     }
 
     .quiz-card {
@@ -675,6 +681,9 @@
 
       font-family: 'Noto Sans TC', sans-serif;
       color: #334155;
+
+      position: relative;
+      overflow: hidden;
     }
 
     .quiz-option:hover {
@@ -683,11 +692,31 @@
     }
 
     .quiz-option.active {
-      background: rgba(92, 124, 137, 0.18);
-      border: 1px solid rgba(92, 124, 137, 0.25);
-
+      background: linear-gradient(135deg, rgba(92, 124, 137, 0.25), rgba(63, 95, 107, 0.15));
+      border: 1px solid rgba(92, 124, 137, 0.5);
       box-shadow:
-        0 6px 14px rgba(92, 124, 137, 0.12);
+        0 10px 25px rgba(92, 124, 137, 0.25),
+        0 0 0 4px rgba(92, 124, 137, 0.12);
+
+      transform: translateY(-2px) scale(1.02);
+      color: #1f2a37;
+      font-weight: 600;
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple 600ms linear;
+      background: rgba(92, 124, 137, 0.25);
+      pointer-events: none;
+    }
+
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
     }
 
     /* 測驗按鈕 */
@@ -713,6 +742,77 @@
 
     .quiz-submit-btn:active {
       transform: scale(0.97);
+    }
+
+    /* ☁️ 修正版：網頁最上層雲朵人樣式 */
+    .cloud-character {
+      position: absolute;
+      width: 75px;
+      /* 預設 cloud1 的尺寸 */
+      height: auto;
+      z-index: 10;
+      /* 移到最上層，確保完全浮在卡片上方不被遮擋 */
+      pointer-events: none;
+      /* 穿透點擊 */
+      opacity: 0;
+      transform: scale(0.5) translateY(40px);
+      /* 初始狀態：縮小並往下沉 */
+      transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 雲朵人 1 號：一進入就觸發（維持原樣） */
+    .cloud-left {
+      top: 3%;
+      left: 8px;
+    }
+
+    /* 當切換到測驗頁（#quizPage.show）時，只有左邊的 1 號會立刻觸發登場 */
+    #quizPage.show .cloud-left {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      animation: cloudFloatLeft 4s ease-in-out infinite alternate;
+      animation-delay: 0.6s;
+    }
+
+    /* ☁️ 雲朵人 2 號 (cloud2)：設定預設大尺寸與右下角位置 */
+    .cloud-right {
+      width: 105px;
+      /* 放大版尺寸 */
+      bottom: 6%;
+      right: 4px;
+      /* 確保在沒有 .show-cloud 之前，維持初始縮小隱藏狀態 */
+      opacity: 0;
+      transform: scale(0.5) translateY(40px);
+    }
+
+    /* 🔥 關鍵新增：當滑動到下方、被 JS 加上 .show-cloud 時，才播放「啵」登場與漂浮動畫 */
+    .cloud-right.show-cloud {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      animation: cloudFloatRight 4.5s ease-in-out infinite alternate;
+      animation-delay: 0.6s;
+      /* 登場完畢後 0.6 秒開始飄浮 */
+    }
+
+    /* 雲朵人各自獨立的微晃軌跡 */
+    @keyframes cloudFloatLeft {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      100% {
+        transform: translateY(-8px) rotate(4deg);
+      }
+    }
+
+    @keyframes cloudFloatRight {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      100% {
+        transform: translateY(-10px) rotate(-4deg);
+      }
     }
 
     /* 結果頁 */
@@ -755,6 +855,7 @@
       z-index: 2;
     }
 
+    /* 修改現有按鈕的通用設定，減少重複 */
     .result-buttons button {
       width: 100%;
       padding: 15px;
@@ -773,31 +874,67 @@
       gap: 8px;
     }
 
-    /* 微光澤與點擊效果 */
-    .result-buttons button:active {
+    /* 新增：專屬「回到首頁」按鈕樣式（空心外框風） */
+    .result-buttons .home-btn-special {
+      background: transparent !important;
+      /* 透明底 */
+      color: #5c7c89;
+      /* 文字用品牌色 */
+      border: 2px solid #5c7c89 !important;
+      /* 加上外框 */
+      box-shadow: none;
+      /* 移除陰影更乾淨 */
+      margin-top: 10px;
+      /* 與上方按鈕拉開一點距離 */
+    }
+
+    /* 點擊效果 */
+    .result-buttons .home-btn-special:active {
+      background: rgba(92, 124, 137, 0.05) !important;
       transform: scale(0.97);
-      box-shadow: 0 4px 10px rgba(92, 124, 137, 0.12);
-      filter: brightness(0.95);
     }
 
 
+    /* 修改原有的 .quiz-mini 樣式 */
     .quiz-mini {
-      margin-top: 18px;
-      font-size: 15px;
-      color: #6b7a82;
-      opacity: 0.8;
+      margin-top: 24px;
+      /* 稍微拉開與主按鈕的距離 */
+      padding: 12px 24px;
+      font-size: 14px;
+      color: #5c7c89;
+      font-family: "Noto Sans TC", sans-serif;
+      font-weight: 500;
+
+      /* 新增樣式：邊框與背景 */
+      background: rgba(92, 124, 137, 0.05);
+      border: 1px solid rgba(92, 124, 137, 0.2);
+      border-radius: 50px;
+      /* 圓角膠囊狀 */
+
+      /* 互動與動畫效果 */
       cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Hover 狀態增加一點顏色變化，引導點擊 */
+    .quiz-mini:hover {
+      background: rgba(92, 124, 137, 0.1);
+      border-color: rgba(92, 124, 137, 0.4);
+      transform: translateY(-2px);
     }
 
     .quiz-mini:active {
-      transform: scale(0.98);
+      transform: scale(0.96);
+      background: rgba(92, 124, 137, 0.15);
     }
   </style>
 </head>
 
 <body>
 
-  <!-- 🌧️ 開場頁 -->
   <div id="intro">
     <div class="intro-wrap">
       <div class="intro-text">
@@ -810,18 +947,15 @@
     </div>
   </div>
   <div class="container">
-    <!-- 🌙 首頁 (升級美化版) -->
     <div id="home" class="page">
       <div class="floating-rain"></div>
 
       <div class="home-header">
-        <!-- 還原原本的傘圖標 ☂ -->
         <div class="umbrella-icon">☂</div>
         <h1>漂流傘</h1>
         <p class="subtitle">一把被陌生人接力撐過的傘</p>
       </div>
 
-      <!-- 精緻手帳卡片 -->
       <div class="card hero" id="journey">
         正在回憶旅程...
       </div>
@@ -835,24 +969,21 @@
         </button>
       </div>
       <div class="quiz-mini" onclick="goPage('quizPage')">
-        雨天人格測驗（點我玩）
+        <i class="fa-solid fa-umbrella-beach"></i> 雨天人格測驗（點我玩）
       </div>
     </div>
 
-    <!-- 🕰️ 時光膠囊 -->
     <div id="timeline" class="page">
       <button class="back-btn" onclick="goPage('home')">‹</button>
       <div class="timeline" id="messages"></div>
     </div>
 
-    <!-- 📝 表單 -->
     <div id="form" class="page">
       <button class="back-btn" onclick="goPage('home')">‹</button>
 
       <div class="card">
         <div class="form-title">留下你的故事</div>
 
-        <!-- 手機貼近心情快捷鍵 -->
         <div class="mood-presets">
           <div class="mood-tag" onclick="quickMood('🌧️ 難過')">🌧️ 難過</div>
           <div class="mood-tag" onclick="quickMood('🌙 孤單')">🌙 孤單</div>
@@ -870,8 +1001,10 @@
         <p id="status"></p>
       </div>
     </div>
-    <!-- 🧠 心理測驗頁 -->
+
     <div id="quizPage" class="page">
+      <img src="./cloud1.PNG" class="cloud-character cloud-left" alt="雲朵人左">
+      <img src="./cloud2.PNG" class="cloud-character cloud-right" alt="雲朵人右">
 
       <div class="result-wrap">
 
@@ -897,7 +1030,6 @@
 
     </div>
 
-    <!-- 🌧 人格結果頁 -->
     <div id="resultPage" class="page">
 
       <div class="result-wrap">
@@ -909,14 +1041,6 @@
         </p>
 
         <div class="result-buttons">
-          <button onclick="goPage('timeline')">
-            <i class="fa-solid fa-hourglass-half"></i> 查看時光膠囊
-          </button>
-
-          <button onclick="goPage('home')">
-            <i class="fa-solid fa-house"></i>
-            回到首頁
-          </button>
           <button onclick="shareResultIG()">
             <i class="fa-solid fa-share-nodes"></i> 分享到社群
           </button>
@@ -927,6 +1051,11 @@
 
           <button onclick="copyCaption()">
             <i class="fa-solid fa-clipboard"></i> 複製IG文案
+          </button>
+
+          <button class="home-btn-special" onclick="goPage('home')">
+            <i class="fa-solid fa-house"></i>
+            回到首頁
           </button>
         </div>
 
@@ -1138,6 +1267,10 @@
 
       container.innerHTML = "";
 
+      // 每次重新載入時，先重設 cloud2 的狀態，確保動畫可以重複觸發
+      const cloud2 = document.querySelector(".cloud-right");
+      if (cloud2) cloud2.classList.remove("show-cloud");
+
       quizQuestions.forEach((q, index) => {
 
         const block = document.createElement("div");
@@ -1145,10 +1278,10 @@
         block.className = "quiz-question";
 
         block.innerHTML = `
-<div class="quiz-question-title">
-        ${index + 1}. ${q.question}
-      </div>
-    `;
+          <div class="quiz-question-title">
+            ${index + 1}. ${q.question}
+          </div>
+        `;
 
         q.options.forEach(option => {
 
@@ -1159,17 +1292,25 @@
           btn.style.marginBottom = "8px";
 
           btn.innerHTML = `
-        <div class="rain-name">${option.text}</div>
-      `;
+            <div class="rain-name">${option.text}</div>
+          `;
 
-          btn.onclick = () => {
+          btn.onclick = (event) => {
+            // 🌊 ripple effect
+            const ripple = document.createElement("span");
+            ripple.className = "ripple";
 
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+
+            ripple.style.width = ripple.style.height = size + "px";
+            ripple.style.left = (event.clientX - rect.left - size / 2) + "px";
+            ripple.style.top = (event.clientY - rect.top - size / 2) + "px";
+
+            btn.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
             selectedAnswers[index] = option.type;
-
-            block.querySelectorAll(".rain-option").forEach(el => {
-              el.style.background = "rgba(92,124,137,0.06)";
-              el.style.border = "1px solid rgba(92,124,137,0.08)";
-            });
 
             block.querySelectorAll(".quiz-option").forEach(el => {
               el.classList.remove("active");
@@ -1183,6 +1324,30 @@
 
         container.appendChild(block);
       });
+
+      // ✨ 【關鍵新增】偵測滾動：當最後一題或送出按鈕進入畫面時，才讓 cloud2 跳出來
+      if ('IntersectionObserver' in window && cloud2) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            // 當內容進入畫面
+            if (entry.isIntersecting) {
+              cloud2.classList.add("show-cloud");
+              observer.unobserve(entry.target); // 觸發過一次後就停止監聽，避免重複跳出
+            }
+          });
+        }, {
+          threshold: 0.1 // 只要按鈕露出 10% 就觸發
+        });
+
+        // 監聽測驗卡片底部的「看看我的雨天人格」送出按鈕
+        const submitBtn = document.querySelector(".quiz-submit-btn");
+        if (submitBtn) {
+          observer.observe(submitBtn);
+        }
+      } else if (cloud2) {
+        // 瀏覽器如果不支援（極少數狀況），就預設直接顯示
+        cloud2.classList.add("show-cloud");
+      }
     }
     /* 顯示測驗結果 */
     function showResult() {
